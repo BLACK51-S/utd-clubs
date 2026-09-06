@@ -36,9 +36,14 @@ import {
 type MemberListProps = {
   members: SelectUserMetadataToClubsWithUserMetadataWithUser[];
   club: SelectClub;
+  listType?: 'member' | 'participant';
 };
 
-const MemberList = ({ members, club }: MemberListProps) => {
+const MemberList = ({
+  members,
+  club,
+  listType = 'member',
+}: MemberListProps) => {
   const membersIndexed = members.sort(defaultUserSort).map((member, index) => {
     return {
       ...member,
