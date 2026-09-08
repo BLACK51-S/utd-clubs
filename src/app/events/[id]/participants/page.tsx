@@ -6,26 +6,32 @@ import { api } from '@/trpc/server';
 export default async function Page({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }) {
-  const { slug } = await params;
+  const { id } = await params;
 
-  const club = await api.club.bySlug({ slug });
-  if (!club) {
+  const event = await api.event.byId({ eventId: id }); //!
+  if (!event) {
     notFound();
   }
 
-  const members = await api.club.getMembers({ clubId: club.id });
+  const participants = await api.event.manage.getParticipants({
+    eventId: event.id,
+  }); //!
 
   return (
     <main>
-      <ManageHeader
-        club={club}
-        path={[{ text: 'Followers', href: `/manage/${slug}/followers` }]}
-        hrefBack={`/manage/${slug}/`}
+      <ManageHeader //make a participant header
+        event={event}
+        path={[{ text: 'Followers', href: `/events/${id}/participants` }]}
+        hrefBack={`/events/${id}/`}
       />
       <div className="flex w-full flex-col items-center">
-        <MemberList members={members} club={club} />
+        <MemberList
+          members={participants}
+          event={event}
+          listType={'participant'}
+        />
       </div>
     </main>
   );

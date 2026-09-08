@@ -5,6 +5,11 @@ import { authedProcedure, createTRPCRouter } from '@/server/api/trpc';
 import { requireMemberRole } from '@/server/api/utils';
 import { club } from '@/server/db/schema/club';
 import { events } from '@/server/db/schema/events';
+import {
+  userMetadata,
+  userMetadataToClubs,
+  userMetadataToEvents,
+} from '@/server/db/schema/users';
 import { eventIdSchema } from '../baseSchemas';
 import { createSchema, disableSyncSchema, editSchema } from './inputSchemas';
 
@@ -172,6 +177,55 @@ const eventManageRouter = createTRPCRouter({
         .where(eq(club.id, input.clubId));
 
       return { success: true };
+    }),
+  getParticipants: authedProcedure
+    .input(eventIdSchema)
+    .query(async ({ input, ctx }) => {
+      const event = await ctx.db.query.events.findFirst({
+        where: (e) => eq(e.id, input.eventId),
+        columns: {
+          id: true,
+          clubId: true,
+        },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Event not found',
+        });
+      }
+
+      await requireMemberRole(ctx.session.user.id, event.clubId, {
+        Officer: {
+          errorMessage:
+            'Must be an officer of this club to view event participants',
+        },
+      });
+
+      return ctx.db
+        .select({
+          userId: userMetadataToEvents.userId,
+          registeredAt: userMetadataToEvents.registeredAt,
+          firstName: userMetadata.firstName,
+          lastName: userMetadata.lastName,
+          major: userMetadata.major,
+          minor: userMetadata.minor,
+          memberType: userMetadataToClubs.memberType,
+        })
+        .from(userMetadataToEvents)
+        .innerJoin(
+          userMetadata,
+          eq(userMetadataToEvents.userId, userMetadata.id),
+        )
+        .leftJoin(
+          userMetadataToClubs,
+          and(
+            eq(userMetadataToClubs.userId, userMetadataToEvents.userId),
+            eq(userMetadataToClubs.clubId, event.clubId),
+          ),
+        )
+        .where(eq(userMetadataToEvents.eventId, event.id));
     }),
 });
 
