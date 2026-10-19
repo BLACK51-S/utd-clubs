@@ -23,6 +23,7 @@ import { useTRPC } from '@/trpc/react';
 import { RouterInputs } from '@/trpc/shared';
 import CustomFooter from './CustomFooter';
 import CustomToolbar from './CustomToolbar';
+import ListGrid from './ListGrid';
 import { MemberListContext, MemberListContextType } from './MemberListContext';
 import useMemberListDeletionState from './useMemberListDeletionState';
 import {
@@ -36,14 +37,9 @@ import {
 type MemberListProps = {
   members: SelectUserMetadataToClubsWithUserMetadataWithUser[];
   club: SelectClub;
-  listType?: 'member' | 'participant';
 };
 
-const MemberList = ({
-  members,
-  club,
-  listType = 'member',
-}: MemberListProps) => {
+const MemberList = ({ members, club }: MemberListProps) => {
   const membersIndexed = members.sort(defaultUserSort).map((member, index) => {
     return {
       ...member,
@@ -277,17 +273,16 @@ const MemberList = ({
   return (
     <div className="flex w-full max-w-6xl flex-col gap-8">
       <MemberListContext.Provider value={MemberListContextValues}>
-        <DataGrid
+        <ListGrid
           rows={rows}
           columns={actionedColumns}
-          // MUI recommends type assertion for passing custom props to slots
-          // Documentation: https://mui.com/x/common-concepts/custom-components/#using-additional-prop
-          slots={{
-            toolbar: CustomToolbar as GridSlots['toolbar'],
-            footer: CustomFooter,
+          toolbar={CustomToolbar as GridSlots['toolbar']}
+          footer={CustomFooter}
+          slotProps={{
+            toolbar: {
+              club,
+            } as GridSlotProps['toolbar'],
           }}
-          slotProps={{ toolbar: { club: club } as GridSlotProps['toolbar'] }}
-          showToolbar
           initialState={{
             columns: {
               columnVisibilityModel: {
@@ -296,19 +291,14 @@ const MemberList = ({
                 minor: false,
               },
             },
-            pagination: { paginationModel: { pageSize: 25 } },
+            pagination: {
+              paginationModel: { pageSize: 25 },
+            },
           }}
-          pageSizeOptions={[25]}
           checkboxSelection
-          disableRowSelectionOnClick
-          disableRowSelectionExcludeModel
-          className="rounded-lg"
           onCellDoubleClick={handleOnCellDoubleClick}
           rowSelectionModel={rowSelectionModel}
-          onRowSelectionModelChange={(newRowSelectionModel) => {
-            setRowSelectionModel(newRowSelectionModel);
-          }}
-          hideFooterSelectedRowCount
+          onRowSelectionModelChange={setRowSelectionModel}
         />
       </MemberListContext.Provider>
       <Confirmation
