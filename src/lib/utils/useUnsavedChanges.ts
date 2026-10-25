@@ -5,17 +5,17 @@ import { useEffect } from "react";
  * Note: If the user clicks on a link on the page, the prompt for unsaved changes will not appear.
  */
 export function useUnsavedChanges(isDirty: boolean) {
-    useEffect(() => {
-        if (!isDirty) {
-            return;
-        }
+  useEffect(() => {
+    if (!isDirty) {
+      return;
+    }
 
-        const onBeforeUnload = (e: BeforeUnloadEvent) => {
-            e.preventDefault();
-            e.returnValue = ""; // failsafe for older browsers
-        };
+  const onBeforeUnload = (e: BeforeUnloadEvent) => {
+    e.preventDefault();
+    e.returnValue = ""; // failsafe for older browsers
+  };
 
-        window.addEventListener("beforeunload", onBeforeUnload);
-        return () => window.removeEventListener("beforeunload", onBeforeUnload);
-    }, [isDirty]);
+  window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  },[isDirty]);
 }
