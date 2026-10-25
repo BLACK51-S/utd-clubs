@@ -1,8 +1,6 @@
 import { notFound } from 'next/navigation';
 import ParticipantEventHeader from '@/systems/events/ParticipantList/ParticipantEventHeader';
 import ParticipantList from '@/systems/events/ParticipantList/ParticipantList';
-import ManageHeader from '@/systems/manage/ManageHeader';
-import MemberList from '@/systems/manage/MemberList';
 import { api } from '@/trpc/server';
 
 export default async function Page({

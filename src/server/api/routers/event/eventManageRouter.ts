@@ -15,11 +15,7 @@ import { requireMemberRole } from '@/server/api/utils';
 import { user as authUser } from '@/server/db/schema/auth';
 import { club } from '@/server/db/schema/club';
 import { events } from '@/server/db/schema/events';
-import {
-  userMetadata,
-  userMetadataToClubs,
-  userMetadataToEvents,
-} from '@/server/db/schema/users';
+import { userMetadata, userMetadataToEvents } from '@/server/db/schema/users';
 import { eventIdSchema } from '../baseSchemas';
 import {
   createSchema,

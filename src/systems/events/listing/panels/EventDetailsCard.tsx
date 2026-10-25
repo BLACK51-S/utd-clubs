@@ -1,10 +1,7 @@
-import PeopleIcon from '@mui/icons-material/People';
 import { Divider, Tooltip } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
 import { formatDistanceStrict } from 'date-fns/formatDistanceStrict';
 import Link from 'next/link';
 import Panel from '@nebula-library/components/Panel';
-import { LinkButton } from '@/lib/components/LinkButton';
 import { api } from '@/trpc/server';
 import { RouterOutputs } from '@/trpc/shared';
 

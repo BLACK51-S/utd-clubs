@@ -3,7 +3,6 @@
 import PersonIcon from '@mui/icons-material/Person';
 import { Button } from '@mui/material';
 import Link from 'next/link';
-import { getGcalEventLink } from '@/lib/modules/googleCalendar/getGcalEventLink';
 
 export default function EventParticipantsButton({
   isHeader,

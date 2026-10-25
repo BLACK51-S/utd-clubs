@@ -1,13 +1,6 @@
 'use client';
 
-import DeleteIcon from '@mui/icons-material/Delete';
-import Button from '@mui/material/Button';
-import {
-  GridColDef,
-  GridRowId,
-  GridRowSelectionModel,
-  GridSlots,
-} from '@mui/x-data-grid';
+import { GridRowId, GridRowSelectionModel, GridSlots } from '@mui/x-data-grid';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import Confirmation from '@/lib/components/Confirmation';
@@ -16,9 +9,8 @@ import type {
   SelectEvent,
   SelectUserMetadataToEventsWithUserMetadataWithUser,
 } from '@/server/db/models';
-import { formatUserListString } from '@/systems/manage/MemberList/utils';
+import ListGrid from '@/systems/manage/MemberList/ListGrid';
 import { useTRPC } from '@/trpc/react';
-import ListGrid from '../../manage/MemberList/ListGrid';
 import CustomToolbar from './CustomToolbar';
 import { ParticipantListContext } from './ParticipantListContex';
 import { columns } from './utils';
