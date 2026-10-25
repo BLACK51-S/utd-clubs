@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 /** 
  * This hook prevents the user from leaving or reloading the page if there are unsaved changes
@@ -10,12 +10,11 @@ export function useUnsavedChanges(isDirty: boolean) {
       return;
     }
 
-  const onBeforeUnload = (e: BeforeUnloadEvent) => {
-    e.preventDefault();
-    e.returnValue = ""; // failsafe for older browsers
-  };
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
 
-  window.addEventListener("beforeunload", onBeforeUnload);
+    window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  },[isDirty]);
+  }, [isDirty]);
 }
