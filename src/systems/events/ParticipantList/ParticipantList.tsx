@@ -5,7 +5,8 @@ import type {
   SelectEvent,
   SelectUserMetadataToEventsWithUserMetadataWithUser,
 } from '@/server/db/models';
-import ListGrid from './ListGrid';
+import ListGrid from '../../manage/MemberList/ListGrid';
+import { columns } from './utils';
 
 type ParticipantListProps = {
   participants: SelectUserMetadataToEventsWithUserMetadataWithUser[];

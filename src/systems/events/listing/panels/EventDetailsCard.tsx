@@ -18,7 +18,7 @@ export default function EventDetailsCard({ event, id }: EventDetailsCardProps) {
       <div key="participants" className="flex flex-row flex-wrap gap-1 py-1">
         <Link
           className="font-medium text-slate-600 dark:text-slate-400"
-          href={`/events/${id}/participants`}
+          href={`/events/${event.id}/participants`}
         >
           Participants
         </Link>

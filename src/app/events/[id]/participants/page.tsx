@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
+import ParticipantEventHeader from '@/systems/events/ParticipantList/ParticipantEventHeader';
+import ParticipantList from '@/systems/events/ParticipantList/ParticipantList';
 import ManageHeader from '@/systems/manage/ManageHeader';
 import MemberList from '@/systems/manage/MemberList';
-import ParticipantList from '@/systems/manage/MemberList/ParticipantList';
 import { api } from '@/trpc/server';
 
 export default async function Page({
@@ -22,9 +23,9 @@ export default async function Page({
 
   return (
     <main>
-      <ManageHeader //make a participant header
+      <ParticipantEventHeader //make a participant header
         event={event}
-        path={[{ text: 'Followers', href: `/events/${id}/participants` }]}
+        path={[{ text: 'Participants' }]}
         hrefBack={`/events/${id}/`}
       />
       <div className="flex w-full flex-col items-center">
