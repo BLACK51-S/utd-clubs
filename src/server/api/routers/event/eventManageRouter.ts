@@ -1,5 +1,14 @@
 import { TRPCError } from '@trpc/server';
-import { and, eq, getTableColumns, gt, isNull, lte, or } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  getTableColumns,
+  gt,
+  inArray,
+  isNull,
+  lte,
+  or,
+} from 'drizzle-orm';
 import { stopWatching } from '@/lib/modules/googleCalendar';
 import { authedProcedure, createTRPCRouter } from '@/server/api/trpc';
 import { requireMemberRole } from '@/server/api/utils';
@@ -12,7 +21,12 @@ import {
   userMetadataToEvents,
 } from '@/server/db/schema/users';
 import { eventIdSchema } from '../baseSchemas';
-import { createSchema, disableSyncSchema, editSchema } from './inputSchemas';
+import {
+  createSchema,
+  disableSyncSchema,
+  editSchema,
+  removeParticipantsSchema,
+} from './inputSchemas';
 
 const eventManageRouter = createTRPCRouter({
   create: authedProcedure
@@ -221,6 +235,78 @@ const eventManageRouter = createTRPCRouter({
         .where(eq(userMetadataToEvents.eventId, event.id));
 
       return rows.map(
+        ({ userId, eventId, registeredAt, metadata, authUser }) => ({
+          userId,
+          eventId,
+          registeredAt,
+          userMetadata: {
+            ...metadata,
+            user: authUser,
+          },
+        }),
+      );
+    }),
+  removeParticipants: authedProcedure
+    .input(removeParticipantsSchema)
+    .mutation(async ({ input, ctx }) => {
+      const event = await ctx.db.query.events.findFirst({
+        where: (e) => eq(e.id, input.eventId),
+        columns: {
+          id: true,
+          clubId: true,
+        },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Event not found',
+        });
+      }
+
+      await requireMemberRole(ctx.session.user.id, event.clubId, {
+        Officer: {
+          errorMessage:
+            'Must be an officer of this club to remove event participants',
+        },
+      });
+
+      const result = await ctx.db
+        .delete(userMetadataToEvents)
+        .where(
+          and(
+            eq(userMetadataToEvents.eventId, event.id),
+            Array.isArray(input.ids)
+              ? inArray(userMetadataToEvents.userId, input.ids)
+              : eq(userMetadataToEvents.userId, input.ids),
+          ),
+        );
+
+      if (result.rowCount === 0) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'No matching registrations were found for this event',
+        });
+      }
+
+      // Return the remaining participants
+      const participants = await ctx.db
+        .select({
+          userId: userMetadataToEvents.userId,
+          eventId: userMetadataToEvents.eventId,
+          registeredAt: userMetadataToEvents.registeredAt,
+          metadata: getTableColumns(userMetadata),
+          authUser: getTableColumns(authUser),
+        })
+        .from(userMetadataToEvents)
+        .innerJoin(
+          userMetadata,
+          eq(userMetadataToEvents.userId, userMetadata.id),
+        )
+        .innerJoin(authUser, eq(userMetadata.id, authUser.id))
+        .where(eq(userMetadataToEvents.eventId, event.id));
+
+      return participants.map(
         ({ userId, eventId, registeredAt, metadata, authUser }) => ({
           userId,
           eventId,
