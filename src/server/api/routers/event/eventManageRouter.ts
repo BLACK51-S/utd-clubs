@@ -1,8 +1,9 @@
 import { TRPCError } from '@trpc/server';
-import { and, eq, gt, isNull, lte, or } from 'drizzle-orm';
+import { and, eq, getTableColumns, gt, isNull, lte, or } from 'drizzle-orm';
 import { stopWatching } from '@/lib/modules/googleCalendar';
 import { authedProcedure, createTRPCRouter } from '@/server/api/trpc';
 import { requireMemberRole } from '@/server/api/utils';
+import { user as authUser } from '@/server/db/schema/auth';
 import { club } from '@/server/db/schema/club';
 import { events } from '@/server/db/schema/events';
 import {
@@ -203,29 +204,33 @@ const eventManageRouter = createTRPCRouter({
         },
       });
 
-      return ctx.db
+      const rows = await ctx.db
         .select({
           userId: userMetadataToEvents.userId,
+          eventId: userMetadataToEvents.eventId,
           registeredAt: userMetadataToEvents.registeredAt,
-          firstName: userMetadata.firstName,
-          lastName: userMetadata.lastName,
-          major: userMetadata.major,
-          minor: userMetadata.minor,
-          memberType: userMetadataToClubs.memberType,
+          metadata: getTableColumns(userMetadata),
+          authUser: getTableColumns(authUser),
         })
         .from(userMetadataToEvents)
         .innerJoin(
           userMetadata,
           eq(userMetadataToEvents.userId, userMetadata.id),
         )
-        .leftJoin(
-          userMetadataToClubs,
-          and(
-            eq(userMetadataToClubs.userId, userMetadataToEvents.userId),
-            eq(userMetadataToClubs.clubId, event.clubId),
-          ),
-        )
+        .innerJoin(authUser, eq(userMetadata.id, authUser.id))
         .where(eq(userMetadataToEvents.eventId, event.id));
+
+      return rows.map(
+        ({ userId, eventId, registeredAt, metadata, authUser }) => ({
+          userId,
+          eventId,
+          registeredAt,
+          userMetadata: {
+            ...metadata,
+            user: authUser,
+          },
+        }),
+      );
     }),
 });
 

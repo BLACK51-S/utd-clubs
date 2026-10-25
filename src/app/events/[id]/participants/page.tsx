@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import ManageHeader from '@/systems/manage/ManageHeader';
 import MemberList from '@/systems/manage/MemberList';
+import ParticipantList from '@/systems/manage/MemberList/ParticipantList';
 import { api } from '@/trpc/server';
 
 export default async function Page({
@@ -27,11 +28,7 @@ export default async function Page({
         hrefBack={`/events/${id}/`}
       />
       <div className="flex w-full flex-col items-center">
-        <MemberList
-          members={participants}
-          event={event}
-          listType={'participant'}
-        />
+        <ParticipantList participants={participants} event={event} />
       </div>
     </main>
   );
