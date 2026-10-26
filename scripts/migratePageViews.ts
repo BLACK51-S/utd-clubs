@@ -27,7 +27,6 @@ const analyticsDataClient = new BetaAnalyticsDataClient({
 });
 
 async function getPathPageViews(path: string) {
-  console.log('Fetching page views from Google Analytics...');
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
   const oneWeekAgoString = oneWeekAgo.toISOString().split('T')[0];
@@ -79,7 +78,6 @@ async function pushToDatabaseTable(
   matchOn: 'slug' | 'id',
   pageViews: { [key: string]: number },
 ) {
-  console.log(`Updating page views in ${getTableName(table)} table...`);
 
   const updatePromises = Object.entries(pageViews).map(([slug, count]) => {
     return db
@@ -97,7 +95,6 @@ async function pushToDatabaseTable(
 
   try {
     await Promise.all(updatePromises);
-    console.log(
       `Successfully updated page views for ${updatePromises.length} clubs.`,
     );
   } catch (error) {
@@ -114,7 +111,6 @@ async function migratePageViews() {
     const eventPageViews = await getPathPageViews('events');
     await pushToDatabaseTable(events, 'id', eventPageViews);
 
-    console.log('Page view migration completed successfully.');
   } catch (error) {
     console.error('Page view migration failed:', error);
     process.exit(1);
